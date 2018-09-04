@@ -295,26 +295,26 @@ public class GraphApp {
             }
 
             // build the graph structure
-            createElements();
-            // read to see they were made
-            readElements();
-
-            for (int i = 0; i < 3; i++) {
-                try {
-                    Thread.sleep((long) (Math.random() * 500) + 500);
-                } catch (InterruptedException e) {
-                    LOGGER.error(e.getMessage(), e);
-                }
-                // update some graph elements with changes
-                updateElements();
-                // read to see the changes were made
-                readElements();
-            }
-
-            // delete some graph elements
-            deleteElements();
-            // read to see the changes were made
-            readElements();
+//            createElements();
+//            // read to see they were made
+//            readElements();
+//
+//            for (int i = 0; i < 3; i++) {
+//                try {
+//                    Thread.sleep((long) (Math.random() * 500) + 500);
+//                } catch (InterruptedException e) {
+//                    LOGGER.error(e.getMessage(), e);
+//                }
+//                // update some graph elements with changes
+//                updateElements();
+//                // read to see the changes were made
+//                readElements();
+//            }
+//
+//            // delete some graph elements
+//            deleteElements();
+//            // read to see the changes were made
+//            readElements();
 
             // close the graph
             closeGraph();

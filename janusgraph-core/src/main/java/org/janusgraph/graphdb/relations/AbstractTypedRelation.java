@@ -115,7 +115,7 @@ public abstract class AbstractTypedRelation extends AbstractElement implements I
     @Override
     public <V> Property<V> property(final String key, final V value) {
         verifyAccess();
-
+        //fixme 这里为啥是get or create key在用之前还能不存在吗？
         PropertyKey pkey = tx().getOrCreatePropertyKey(key, value);
         Object normalizedValue = tx().verifyAttribute(pkey,value);
         it().setPropertyDirect(pkey,normalizedValue);

@@ -619,7 +619,7 @@
                                             ${finalName}-${<id /> from assembly descriptor}.${archive
                                             format extension}
                                         -->
-                                        <finalName>janusgraph-${project.version}-${hadoop.version.tag}</finalName>
+                                        <finalName>janusgraph-${project.version}-hadoop2</finalName>
                                         <appendAssemblyId>false</appendAssemblyId>
                                         <tarLongFileMode>gnu</tarLongFileMode>
                                         <descriptors>
@@ -768,23 +768,23 @@
                                 <testClassesDirectory>${top.level.basedir}/janusgraph-dist/target/test-classes</testClassesDirectory>
                             </configuration>
                             <executions>
-                                <execution>
-                                    <id>integration-test</id>
-                                    <phase>integration-test</phase>
-                                    <goals>
-                                        <goal>integration-test</goal>
-                                    </goals>
-                                    <configuration>
-                                        <excludedGroups>org.janusgraph.testcategory.OrderedKeyStoreTests,org.janusgraph.testcategory.UnorderedKeyStoreTests</excludedGroups>
-                                        <skip>${skipDefaultDistroIT}</skip>
-                                        <failIfNoTests>false</failIfNoTests>
-                                        <excludes>
-                                            <exclude>**/*HBase*IT.java</exclude>
-                                            <exclude>**/*Cassandra*IT.java</exclude>
-                                            <exclude>**/*CompatIT.java</exclude>
-                                        </excludes>
-                                    </configuration>
-                                </execution>
+                                <!--<execution>-->
+                                    <!--<id>integration-test</id>-->
+                                    <!--<phase>integration-test</phase>-->
+                                    <!--<goals>-->
+                                        <!--<goal>integration-test</goal>-->
+                                    <!--</goals>-->
+                                    <!--<configuration>-->
+                                        <!--<excludedGroups>org.janusgraph.testcategory.OrderedKeyStoreTests,org.janusgraph.testcategory.UnorderedKeyStoreTests</excludedGroups>-->
+                                        <!--<skip>${skipDefaultDistroIT}</skip>-->
+                                        <!--<failIfNoTests>false</failIfNoTests>-->
+                                        <!--<excludes>-->
+                                            <!--<exclude>**/*HBase*IT.java</exclude>-->
+                                            <!--<exclude>**/*Cassandra*IT.java</exclude>-->
+                                            <!--<exclude>**/*CompatIT.java</exclude>-->
+                                        <!--</excludes>-->
+                                    <!--</configuration>-->
+                                <!--</execution>-->
                                 <execution>
                                     <id>cassandra-murmur-integration-test</id>
                                     <phase>integration-test</phase>

@@ -823,7 +823,7 @@ public class KCVSLog implements Log, BackendOperation.TransactionalProvider {
 
     private StaticBuffer getSettingKey(String identifier) {
         DataOutput out = manager.serializer.getDataOutput(4 + 2 + identifier.length());
-        out.putInt(SYSTEM_PARTITION_ID);
+        out.putInt(SYSTEM_PARTITION_ID); // 4字节
         out.writeObjectNotNull(identifier);
         return out.getStaticBuffer();
     }

@@ -799,6 +799,7 @@ public class GraphDatabaseConfiguration {
     /**
      * The number of milliseconds the system waits for an id block application to be acknowledged by the storage backend.
      * Also, the time waited after the application before verifying that the application was successful.
+     * fixme，hbase应该不用等待？但是考虑到没有原子钟，不同机器的时间可能有shift，所以这里应该大于最大shift
      */
     public static final ConfigOption<Duration> IDAUTHORITY_WAIT = new ConfigOption<>(IDAUTHORITY_NS,"wait-time",
             "The number of milliseconds the system waits for an ID block reservation to be acknowledged by the storage backend",
@@ -856,7 +857,7 @@ public class GraphDatabaseConfiguration {
         public boolean apply(@Nullable Integer uniqueIdBitWidth) {
             return uniqueIdBitWidth>=0 && uniqueIdBitWidth<=16;
         }
-    });
+    }); // fixme 所以所有的id都会左移4位
 
     /**
      * Unique id marker to be used by this JanusGraph instance when allocating ids. The unique id marker
@@ -1380,7 +1381,7 @@ public class GraphDatabaseConfiguration {
         ModifiableConfiguration overwrite = new ModifiableConfiguration(ROOT_NS,new CommonsConfiguration(), BasicConfiguration.Restriction.NONE);
 
         final KeyColumnValueStoreManager storeManager = Backend.getStorageManager(localbc);
-        final StoreFeatures storeFeatures = storeManager.getFeatures();
+        final StoreFeatures storeFeatures = storeManager.getFeatures();// 获取feature 会创建table
         KCVSConfiguration kcvsConfig=Backend.getStandaloneGlobalConfiguration(storeManager,localbc);
         ReadConfiguration globalConfig=null;
 
@@ -1390,7 +1391,7 @@ public class GraphDatabaseConfiguration {
 
         //Read out global configuration
         try {
-            // If lock prefix is unspecified, specify it now
+            // If lock prefix is unspecified, specify it now 设置内存锁，进程内可以避免使用分布式锁，提高性能
             if (!localbc.has(LOCK_LOCAL_MEDIATOR_GROUP)) {
                 overwrite.set(LOCK_LOCAL_MEDIATOR_GROUP, storeManager.getName());
             }

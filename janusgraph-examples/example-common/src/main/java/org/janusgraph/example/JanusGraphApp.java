@@ -18,9 +18,11 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.janusgraph.core.EdgeLabel;
 import org.janusgraph.core.JanusGraph;
 import org.janusgraph.core.JanusGraphFactory;
 import org.janusgraph.core.Multiplicity;
+import org.janusgraph.core.PropertyKey;
 import org.janusgraph.core.RelationType;
 import org.janusgraph.core.attribute.Geoshape;
 import org.janusgraph.core.schema.JanusGraphManagement;
@@ -108,10 +110,10 @@ public class JanusGraphApp extends GraphApp {
             }
             LOGGER.info("creating schema");
             createProperties(mgmt);
-            createVertexLabels(mgmt);
-            createEdgeLabels(mgmt);
-            createCompositeIndexes(mgmt);
-            createMixedIndexes(mgmt);
+//            createVertexLabels(mgmt);
+//            createEdgeLabels(mgmt);
+//            createCompositeIndexes(mgmt);
+//            createMixedIndexes(mgmt);
             mgmt.commit();
         } catch (Exception e) {
             mgmt.rollback();
@@ -134,7 +136,7 @@ public class JanusGraphApp extends GraphApp {
      * Creates the edge labels.
      */
     protected void createEdgeLabels(final JanusGraphManagement mgmt) {
-        mgmt.makeEdgeLabel("father").multiplicity(Multiplicity.MANY2ONE).make();
+        EdgeLabel father = mgmt.makeEdgeLabel("father").multiplicity(Multiplicity.MANY2ONE).make();
         mgmt.makeEdgeLabel("mother").multiplicity(Multiplicity.MANY2ONE).make();
         mgmt.makeEdgeLabel("lives").signature(mgmt.getPropertyKey("reason")).make();
         mgmt.makeEdgeLabel("pet").make();
@@ -143,14 +145,14 @@ public class JanusGraphApp extends GraphApp {
     }
 
     /**
-     * Creates the properties for vertices, edges, and meta-properties.
+     * Creates the properties for vertices, edges, and meta-properties. 这里每个make只是保存到transaction的cache里，不落库
      */
     protected void createProperties(final JanusGraphManagement mgmt) {
-        mgmt.makePropertyKey("name").dataType(String.class).make();
-        mgmt.makePropertyKey("age").dataType(Integer.class).make();
-        mgmt.makePropertyKey("time").dataType(Integer.class).make();
-        mgmt.makePropertyKey("reason").dataType(String.class).make();
-        mgmt.makePropertyKey("place").dataType(Geoshape.class).make();
+        PropertyKey pk = mgmt.makePropertyKey("name").dataType(String.class).make();
+//        mgmt.makePropertyKey("age").dataType(Integer.class).make();
+//        mgmt.makePropertyKey("time").dataType(Integer.class).make();
+//        mgmt.makePropertyKey("reason").dataType(String.class).make();
+//        mgmt.makePropertyKey("place").dataType(Geoshape.class).make();
     }
 
     /**
@@ -231,7 +233,9 @@ public class JanusGraphApp extends GraphApp {
     }
 
     public static void main(String[] args) throws Exception {
-        final String fileName = (args != null && args.length > 0) ? args[0] : null;
+//        final String fileName = (args != null && args.length > 0) ? args[0] : null;
+//        final String fileName = "/Users/ygy/code/github/janusgraph/janusgraph-examples/example-common/conf/jgex-inmemory.properties";
+        final String fileName = "/Users/ygy/code/github/janusgraph/janusgraph-examples/example-common/conf/jgex-standalone_hbase-embeded_es.properties";
         final boolean drop = (args != null && args.length > 1) ? "drop".equalsIgnoreCase(args[1]) : false;
         final JanusGraphApp app = new JanusGraphApp(fileName);
         if (drop) {

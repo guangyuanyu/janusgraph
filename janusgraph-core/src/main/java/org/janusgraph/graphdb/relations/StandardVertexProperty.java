@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  * @author Matthias Broecheler (me@matthiasb.com)
  */
-
+// fixme 这个是描述一个vertex的 property， 不是propertyVertex
 public class StandardVertexProperty extends AbstractVertexProperty implements StandardRelation, ReassignableRelation {
 
     public StandardVertexProperty(long id, PropertyKey type, InternalVertex vertex, Object value, byte lifecycle) {

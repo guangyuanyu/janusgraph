@@ -28,9 +28,9 @@ import org.apache.tinkerpop.gremlin.structure.VertexProperty;
  * It is defined and uniquely identified by its id.
  * <p>
  * For the id, it holds that:
- * id&lt;0: Temporary id, will be assigned id&gt;0 when the transaction is committed
- * id=0: Virtual or implicit element that does not physically exist in the database
- * id&gt;0: Physically persisted element
+ * id&lt;0: Temporary id, will be assigned id&gt;0 when the transaction is committed fixme 临时id会被替换
+ * id=0: Virtual or implicit element that does not physically exist in the database fixme =0时不会落库
+ * id&gt;0: Physically persisted element fixme >0 时， 是实际落库的节点
  *
  * @author Matthias Broecheler (me@matthiasb.com)
  */

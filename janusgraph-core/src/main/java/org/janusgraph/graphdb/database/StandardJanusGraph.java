@@ -175,7 +175,7 @@ public class StandardJanusGraph extends JanusGraphBlueprintsGraph {
 
         shutdownHook = new ShutdownThread(this);
         Runtime.getRuntime().addShutdownHook(shutdownHook);
-        log.debug("Installed shutdown hook {}", shutdownHook, new Throwable("Hook creation trace"));
+        log.debug("Installed shutdown hook {}", shutdownHook);
     }
 
     public String getGraphName() {
@@ -525,7 +525,7 @@ public class StandardJanusGraph extends JanusGraphBlueprintsGraph {
         ListMultimap<Long, InternalRelation> mutations = ArrayListMultimap.create();
         ListMultimap<InternalVertex, InternalRelation> mutatedProperties = ArrayListMultimap.create();
         List<IndexSerializer.IndexUpdate> indexUpdates = Lists.newArrayList();
-        //1) Collect deleted edges and their index updates and acquire edge locks
+        //1) Collect deleted edges and their index updates and acquire edge locks fixme 收集 delete edge的索引，获得lock
         for (InternalRelation del : Iterables.filter(deletedRelations,filter)) {
             Preconditions.checkArgument(del.isRemoved());
             for (int pos = 0; pos < del.getLen(); pos++) {
@@ -542,7 +542,7 @@ public class StandardJanusGraph extends JanusGraphBlueprintsGraph {
             indexUpdates.addAll(indexSerializer.getIndexUpdates(del));
         }
 
-        //2) Collect added edges and their index updates and acquire edge locks
+        //2) Collect added edges and their index updates and acquire edge locks fixme 收集add edge的index，并获得lock
         for (InternalRelation add : Iterables.filter(addedRelations,filter)) {
             Preconditions.checkArgument(add.isNew());
 
@@ -561,10 +561,10 @@ public class StandardJanusGraph extends JanusGraphBlueprintsGraph {
         }
 
         //3) Collect all index update for vertices
-        for (InternalVertex v : mutatedProperties.keySet()) {
+        for (InternalVertex v : mutatedProperties.keySet()) { //fixme 这里收集vertex 涉及的index，这里没有锁？
             indexUpdates.addAll(indexSerializer.getIndexUpdates(v,mutatedProperties.get(v)));
         }
-        //4) Acquire index locks (deletions first)
+        //4) Acquire index locks (deletions first) fixme 这里获得lock ，delete 的index
         for (IndexSerializer.IndexUpdate update : indexUpdates) {
             if (!update.isCompositeIndex() || !update.isDeletion()) continue;
             CompositeIndexType iIndex = (CompositeIndexType) update.getIndex();
@@ -572,7 +572,7 @@ public class StandardJanusGraph extends JanusGraphBlueprintsGraph {
                 mutator.acquireIndexLock((StaticBuffer)update.getKey(), (Entry)update.getEntry());
             }
         }
-        for (IndexSerializer.IndexUpdate update : indexUpdates) {
+        for (IndexSerializer.IndexUpdate update : indexUpdates) { //fixme 这获得add index lock
             if (!update.isCompositeIndex() || !update.isAddition()) continue;
             CompositeIndexType iIndex = (CompositeIndexType) update.getIndex();
             if (acquireLock(iIndex,acquireLocks)) {
@@ -703,8 +703,9 @@ public class StandardJanusGraph extends JanusGraphBlueprintsGraph {
                  * isolation, then don't create a separate tx.
                  */
                 final BackendTransaction schemaMutator = openBackendTransaction(tx);
-
+                //fixme 两阶段提交 prepare commit
                 try {
+                    // fixme prepare 只在hbase中写锁，不做数据保存操作
                     //[FAILURE] If the preparation throws an exception abort directly - nothing persisted since batch-loading cannot be enabled for schema elements
                     commitSummary = prepareCommit(addedRelations,deletedRelations, SCHEMA_FILTER, schemaMutator, tx, acquireLocks);
                     assert commitSummary.hasModifications && !commitSummary.has2iModifications;

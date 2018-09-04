@@ -88,7 +88,7 @@ public class StandardIDPool implements IDPool {
 //    private long nextID;
 //    private long currentMaxID;
 //    private long renewBufferID;
-
+    //fixme nextBlock()方法都是synchronized 还加毛volatile啊
     private volatile IDBlock nextBlock;
     private Future<IDBlock> idBlockFuture;
     private IDBlockGetter idBlockGetter;
@@ -198,20 +198,20 @@ public class StandardIDPool implements IDPool {
         renewBlockIndex = Math.max(0,currentBlock.numIds()-Math.max(RENEW_ID_COUNT, Math.round(currentBlock.numIds()*renewBufferPercentage)));
         assert renewBlockIndex<currentBlock.numIds() && renewBlockIndex>=currentIndex;
     }
-
+    // fixme nextID 是 synchronized 的方法
     @Override
     public synchronized long nextID() {
         assert currentIndex <= currentBlock.numIds();
 
         if (currentIndex == currentBlock.numIds()) {
-            try {
+            try { // fixme 一次分配一段id
                 nextBlock();
             } catch (InterruptedException e) {
                 throw new JanusGraphException("Could not renew id block due to interruption", e);
             }
         }
-
-        if (currentIndex == renewBlockIndex) {
+        // fixme currentIndex 在nextBlock里start了一次。这里为什么又start了一次？ 上一次分配的nextBlock给了currentBlock，nextBlock分配后会null
+        if (currentIndex == renewBlockIndex) { // 这里会启动一个新线程分配nextBlock，不会将nextBlock分配给currentBlock
             startIDBlockGetter();
         }
 
@@ -247,7 +247,7 @@ public class StandardIDPool implements IDPool {
         Preconditions.checkArgument(idBlockFuture == null, idBlockFuture);
         if (closed) return; //Don't renew anymore if closed
         //Renew buffer
-        log.debug("Starting id block renewal thread upon {}", currentIndex);
+        log.info("Starting id block renewal thread upon {}", currentIndex);
         idBlockGetter = new IDBlockGetter(idAuthority, partition, idNamespace, renewTimeout);
         idBlockFuture = exec.submit(idBlockGetter);
     }
@@ -286,7 +286,7 @@ public class StandardIDPool implements IDPool {
                     throw new JanusGraphException("ID block retrieval aborted by caller");
                 }
                 IDBlock idBlock = idAuthority.getIDBlock(partition, idNamespace, renewTimeout);
-                log.debug("Retrieved ID block from authority on partition({})-namespace({}), " +
+                log.info("Retrieved ID block from authority on partition({})-namespace({}), " +
                           "exec time {}, exec+q time {}",
                           partition, idNamespace, running.stop(), alive.stop());
                 Preconditions.checkArgument(idBlock!=null && idBlock.numIds()>0);

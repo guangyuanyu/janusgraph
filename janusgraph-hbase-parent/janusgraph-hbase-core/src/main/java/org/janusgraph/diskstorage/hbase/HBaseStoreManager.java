@@ -341,7 +341,7 @@ public class HBaseStoreManager extends DistributedStoreManager implements KeyCol
 
         openStores = new ConcurrentHashMap<>();
     }
-
+    //fixme 用于创建 列族 的 shortName map，节省存储空间 , 没有vertex相关的列族？vertex不需要存成列
     public static BiMap<String, String> createShortCfMap(Configuration config) {
         return ImmutableBiMap.<String, String>builder()
                 .put(INDEXSTORE_NAME, "g")
@@ -394,7 +394,7 @@ public class HBaseStoreManager extends DistributedStoreManager implements KeyCol
         IOUtils.closeQuietly(cnx);
     }
 
-    @Override
+    @Override// feature 是和底层存储相关的，需要先验知识, 并不需要从底层拿，而是写死的
     public StoreFeatures getFeatures() {
 
         Configuration c = GraphDatabaseConfiguration.buildGraphConfiguration();
@@ -527,6 +527,7 @@ public class HBaseStoreManager extends DistributedStoreManager implements KeyCol
     public List<KeyRange> getLocalKeyPartition() throws BackendException {
         List<KeyRange> result = new LinkedList<>();
         try {
+            // 具体建表操作
             ensureTableExists(
                 tableName, getCfNameForStoreName(GraphDatabaseConfiguration.SYSTEM_PROPERTIES_STORE_NAME), 0);
             Map<KeyRange, ServerName> normed = normalizeKeyBounds(cnx.getRegionLocations(tableName));
@@ -836,11 +837,11 @@ public class HBaseStoreManager extends DistributedStoreManager implements KeyCol
                     HColumnDescriptor cdesc = new HColumnDescriptor(columnFamily);
 
                     setCFOptions(cdesc, ttlInSeconds);
-
+                    logger.info("add column family: ", cf);
                     adm.addColumn(tableName, cdesc);
 
                     try {
-                        logger.debug("Added HBase ColumnFamily {}, waiting for 1 sec. to propogate.", columnFamily);
+                        logger.info("Added HBase ColumnFamily {}, waiting for 1 sec. to propogate.", columnFamily);
                         Thread.sleep(1000L);
                     } catch (InterruptedException ie) {
                         throw new TemporaryBackendException(ie);
@@ -890,11 +891,11 @@ public class HBaseStoreManager extends DistributedStoreManager implements KeyCol
             String cfString = getCfNameForStoreName(entry.getKey());
             byte[] cfName = Bytes.toBytes(cfString);
 
-            for (Map.Entry<StaticBuffer, KCVMutation> m : entry.getValue().entrySet()) {
+            for (Map.Entry<StaticBuffer, KCVMutation> m : entry.getValue().entrySet()) {//聚合的过程，把相同rowKey的放到一个put里
                 final byte[] key = m.getKey().as(StaticBuffer.ARRAY_FACTORY);
                 KCVMutation mutation = m.getValue();
 
-                Pair<List<Put>, Delete> commands = commandsPerKey.get(m.getKey());
+                Pair<List<Put>, Delete> commands = commandsPerKey.get(m.getKey());//聚合的过程，把相同rowKey的放到一个put里
 
                 // The firt time we go through the list of input <rowkey, KCVMutation>,
                 // create the holder for a particular rowkey

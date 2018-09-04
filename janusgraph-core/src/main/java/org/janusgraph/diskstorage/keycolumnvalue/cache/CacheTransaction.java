@@ -90,7 +90,7 @@ public class CacheTransaction implements StoreTransaction, LoggableTransaction {
             flushInternal();
         }
     }
-
+    //fixme cache 持久化操作
     private int persist(final Map<String, Map<StaticBuffer, KCVMutation>> subMutations) {
         BackendOperation.execute(new Callable<Boolean>() {
             @Override

@@ -224,6 +224,7 @@ public class ManagementSystem implements JanusGraphManagement {
     @Override
     public synchronized void commit() {
         ensureOpen();
+        //fixme 首先看配置是否有变化
         //Commit config changes
         if (transactionalConfig.hasMutations()) {
             DataOutput out = graph.getDataSerializer().getDataOutput(128);
@@ -231,8 +232,10 @@ public class ManagementSystem implements JanusGraphManagement {
             transactionalConfig.logMutations(out);
             sysLog.add(out.getStaticBuffer());
         }
+        //fixme 先提交config的
         transactionalConfig.commit();
 
+        //fixme 再提交 tx 本身
         //Commit underlying transaction
         transaction.commit();
 
@@ -579,7 +582,7 @@ public class ManagementSystem implements JanusGraphManagement {
         JanusGraphSchemaVertex indexVertex = transaction.makeSchemaVertex(JanusGraphSchemaCategory.GRAPHINDEX, indexName, def);
         for (int i = 0; i < keys.length; i++) {
             Parameter[] paras = {ParameterType.INDEX_POSITION.getParameter(i)};
-            addSchemaEdge(indexVertex, keys[i], TypeDefinitionCategory.INDEX_FIELD, paras);
+            addSchemaEdge(indexVertex, keys[i], TypeDefinitionCategory.INDEX_FIELD, paras);//fixmeindexVertex有到propertyKey的edge
         }
 
         Preconditions.checkArgument(constraint == null || (elementCategory.isValidConstraint(constraint) && constraint instanceof JanusGraphSchemaVertex));
@@ -666,7 +669,7 @@ public class ManagementSystem implements JanusGraphManagement {
     /* --------------
     Schema Update
      --------------- */
-
+    // fixme 更新已经存在是索引？当索引中用到的propertyKey不是新建时，就需要update
     @Override
     public IndexJobFuture updateIndex(Index index, SchemaAction updateAction) {
         Preconditions.checkArgument(index != null, "Need to provide an index");

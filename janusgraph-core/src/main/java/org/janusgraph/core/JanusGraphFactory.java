@@ -161,6 +161,7 @@ public class JanusGraphFactory {
                          "\"graph.graphname\" so these graphs should be accessed dynamically by supplying a .properties file here " +
                          "or by using the ConfiguredGraphFactory.");
             }
+            // new GraphDatabaseConfiguration 会确保表存在，没有则新表
             return new StandardJanusGraph(new GraphDatabaseConfiguration(configuration));
         }
     }

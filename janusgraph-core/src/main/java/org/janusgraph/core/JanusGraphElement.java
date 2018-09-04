@@ -40,7 +40,7 @@ import org.apache.tinkerpop.gremlin.structure.Property;
  * @see JanusGraphVertex
  * @see JanusGraphRelation
  */
-public interface JanusGraphElement extends Element, Idfiable, Removable {
+public interface  JanusGraphElement extends Element, Idfiable, Removable {
 
     @Override
     public JanusGraphTransaction graph();

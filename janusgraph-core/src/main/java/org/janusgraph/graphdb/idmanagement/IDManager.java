@@ -32,14 +32,14 @@ public class IDManager {
     /**
      *bit mask- Description (+ indicates defined type, * indicates proper &amp; defined type)
      *
-     *      0 - + User created Vertex
+     *      0 - + User created Vertex fixme 用户创建的vertex类型
      *    000 -     * Normal vertices
      *    010 -     * Partitioned vertices
      *    100 -     * Unmodifiable (e.g. TTL'ed) vertices
      *    110 -     + Reserved for additional vertex type
      *      1 - + Invisible
      *     11 -     * Invisible (user created/triggered) Vertex [for later]
-     *     01 -     + Schema related vertices
+     *     01 -     + Schema related vertices fixme schema节点类型
      *    101 -         + Schema Type vertices
      *   0101 -             + Relation Type vertices
      *  00101 -                 + Property Key
@@ -409,7 +409,7 @@ public class IDManager {
     private final long relationCountBound;
     private final long vertexCountBound;
 
-
+    // fixme 新建 idManager时 需要指定 partition 占用的bit位数
     public IDManager(long partitionBits) {
         Preconditions.checkArgument(partitionBits >= 0);
         Preconditions.checkArgument(partitionBits <= MAX_PARTITION_BITS,
@@ -441,7 +441,7 @@ public class IDManager {
      /*		--- JanusGraphElement id bit format ---
       *  [ 0 | count | partition | ID padding (if any) ]
      */
-
+    // fixme id生成方式
     private long constructId(long count, long partition, VertexIDType type) {
         Preconditions.checkArgument(partition<partitionIDBound && partition>=0,"Invalid partition: %s",partition);
         Preconditions.checkArgument(count>=0);
@@ -452,7 +452,7 @@ public class IDManager {
         if (type!=null) id = type.addPadding(id);
         return id;
     }
-
+    // fixme  用户定义的vertex只包含3种类型
     private static VertexIDType getUserVertexIDType(long vertexid) {
         VertexIDType type=null;
         if (VertexIDType.NormalVertex.is(vertexid)) type=VertexIDType.NormalVertex;
@@ -476,7 +476,7 @@ public class IDManager {
         assert partition>=0;
         return partition;
     }
-
+    // fixme 从vertexId 生成 rowKey 0 | partition | count | ID padding (if any) 和上面constructId不同，为啥不用一样的？
     public StaticBuffer getKey(long vertexid) {
         if (VertexIDType.Schema.is(vertexid)) {
             //No partition for schema vertices
@@ -492,7 +492,7 @@ public class IDManager {
             return BufferUtil.getLongBuffer(keyid);
         }
     }
-
+    // fixme 从rowkey 转 vertexId
     public long getKeyID(StaticBuffer b) {
         long value = b.getLong(0);
         if (VertexIDType.Schema.is(value)) {
@@ -620,7 +620,7 @@ public class IDManager {
         Preconditions.checkArgument(type.isProper(),"Invalid vertex id type: %s",type);
         return makeTemporary(type.addPadding(count));
     }
-
+    //fixme 负数有特殊含义？？ 见 AbstractElement
     private static long makeTemporary(long id) {
         Preconditions.checkArgument(id>0);
         return (1l<<63) | id; //make negative but preserve bit pattern

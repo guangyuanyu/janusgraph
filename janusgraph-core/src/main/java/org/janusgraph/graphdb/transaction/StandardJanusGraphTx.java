@@ -674,7 +674,7 @@ public class StandardJanusGraphTx extends JanusGraphBlueprintsTransaction implem
         return uniqueLock;
     }
 
-
+    // fixme 索引indexVertex 和 建立索引的propertyKey 建立一条边
     public JanusGraphEdge addEdge(JanusGraphVertex outVertex, JanusGraphVertex inVertex, EdgeLabel label) {
         verifyWriteAccess(outVertex, inVertex);
         outVertex = ((InternalVertex) outVertex).it();
@@ -825,7 +825,7 @@ public class StandardJanusGraphTx extends JanusGraphBlueprintsTransaction implem
     /*
      * ------------------------------------ Schema Handling ------------------------------------
      */
-
+    //todo 新建schema vertex节点，所以schema也是一种节点，只不过不可见？业务schema节点需要再建一个可见的节点index也是schemavertex
     public final JanusGraphSchemaVertex makeSchemaVertex(JanusGraphSchemaCategory schemaCategory, String name, TypeDefinitionMap definition) {
         verifyOpen();
         Preconditions.checkArgument(!schemaCategory.hasName() || StringUtils.isNotBlank(name), "Need to provide a valid name for type [%s]", schemaCategory);
@@ -843,14 +843,15 @@ public class StandardJanusGraphTx extends JanusGraphBlueprintsTransaction implem
         } else {
             schemaVertex = new JanusGraphSchemaVertex(this, IDManager.getTemporaryVertexID(IDManager.VertexIDType.GenericSchemaType,temporaryIds.nextID()), ElementLifeCycle.New);
         }
-
+        // fixme 上面用temporaryIds分配的id，这里又分配一次，为啥？？？？
         graph.assignID(schemaVertex, BaseVertexLabel.DEFAULT_VERTEXLABEL);
         Preconditions.checkArgument(schemaVertex.longId() > 0);
-        if (schemaCategory.hasName()) addProperty(schemaVertex, BaseKey.SchemaName, schemaCategory.getSchemaName(name));
+        if (schemaCategory.hasName())
+            addProperty(schemaVertex, BaseKey.SchemaName, schemaCategory.getSchemaName(name));
         addProperty(schemaVertex, BaseKey.VertexExists, Boolean.TRUE);
         addProperty(schemaVertex, BaseKey.SchemaCategory, schemaCategory);
         updateSchemaVertex(schemaVertex);
-        addProperty(schemaVertex, BaseKey.SchemaUpdateTime, times.getTime(times.getTime()));
+        addProperty(schemaVertex, BaseKey.SchemaUpdateTime, times.getTime(times.getTime()));//fixme上面updateSchemaVertex已经更新了时间，这里为什么又更新了一次
         for (Map.Entry<TypeDefinitionCategory,Object> def : definition.entrySet()) {
             JanusGraphVertexProperty p = addProperty(schemaVertex, BaseKey.SchemaDefinitionProperty, def.getValue());
             p.property(BaseKey.SchemaDefinitionDesc.name(), TypeDefinitionDescription.of(def.getKey()));
@@ -864,7 +865,7 @@ public class StandardJanusGraphTx extends JanusGraphBlueprintsTransaction implem
     public void updateSchemaVertex(JanusGraphSchemaVertex schemaVertex) {
         addProperty(VertexProperty.Cardinality.single, schemaVertex, BaseKey.SchemaUpdateTime, times.getTime(times.getTime()));
     }
-
+    // fixme propertyKeyVertex 是一种shemaVertex
     public PropertyKey makePropertyKey(String name, TypeDefinitionMap definition) {
         return (PropertyKey) makeSchemaVertex(JanusGraphSchemaCategory.PROPERTYKEY, name, definition);
     }
@@ -1370,7 +1371,7 @@ public class StandardJanusGraphTx extends JanusGraphBlueprintsTransaction implem
             MetricManager.INSTANCE.getCounter(config.getGroupName(), "tx", "commit").inc();
         }
         try {
-            if (hasModifications()) {
+            if (hasModifications()) { //fixme tx commit 调用graph的commit方法
                 graph.commit(addedRelations.getAll(), deletedRelations.values(), this);
             } else {
                 txHandle.commit();

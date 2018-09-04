@@ -146,7 +146,7 @@ public class HBaseKeyColumnValueStore implements KeyColumnValueStore {
 
         return filter;
     }
-
+    //fixme 生成hbase Get操作
     private Map<StaticBuffer,EntryList> getHelper(List<StaticBuffer> keys, Filter getFilter) throws BackendException {
         List<Get> requests = new ArrayList<Get>(keys.size());
         {

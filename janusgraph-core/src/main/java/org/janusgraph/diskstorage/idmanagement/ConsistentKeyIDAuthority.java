@@ -111,7 +111,7 @@ public class ConsistentKeyIDAuthority extends AbstractIDAuthority implements Bac
         Preconditions.checkNotNull(times);
 
         supportsInterruption = manager.getFeatures().supportsInterruption();
-
+        //fixme 拼写错误
         partitionBitWdith = NumberUtil.getPowerOf2(config.get(CLUSTER_MAX_PARTITIONS));
         Preconditions.checkArgument(partitionBitWdith>=0 && partitionBitWdith<=16);
 
@@ -173,7 +173,7 @@ public class ConsistentKeyIDAuthority extends AbstractIDAuthority implements Bac
             @Override
             public List<Entry> call(StoreTransaction txh) throws BackendException {
                 return idStore.getSlice(new KeySliceQuery(partitionKey, LOWER_SLICE, UPPER_SLICE).setLimit(5), txh);
-            }
+            } // fixme 这里limit 5，因为column key用返码保存的，所以理论上升序排列就能取到最大的值，所以5是不是可以改成1？
         },this,times);
 
         if (blocks == null) throw new TemporaryBackendException("Could not read from storage");
@@ -234,7 +234,7 @@ public class ConsistentKeyIDAuthority extends AbstractIDAuthority implements Bac
             final int uniquePID = getUniquePartitionID();
             final StaticBuffer partitionKey = getPartitionKey(partition,idNamespace,uniquePID);
             try {
-                long nextStart = getCurrentID(partitionKey);
+                long nextStart = getCurrentID(partitionKey); // fixme 获得开始的nextStart
                 if (idBlockUpperBound - blockSize <= nextStart) {
                     log.info("ID overflow detected on partition({})-namespace({}) with uniqueid {}. Current id {}, block size {}, and upper bound {} for bit width {}.",
                             partition, idNamespace, uniquePID, nextStart, blockSize, idBlockUpperBound, uniqueIdBitWidth);
@@ -299,7 +299,7 @@ public class ConsistentKeyIDAuthority extends AbstractIDAuthority implements Bac
                                     "If you have multiple JanusGraph instances running on one physical machine, ensure that they have unique machine idAuthorities");
 
                         /* If our claim is the lexicographically first one, then our claim
-                         * is the most senior one and we own this id block
+                         * is the most senior one and we own this id block fixme 比较第0个是不是当前instance写的，如果是则认为分配成功
                          */
                         if (target.equals(blocks.get(0).getColumnAs(StaticBuffer.STATIC_FACTORY))) {
 
@@ -361,7 +361,7 @@ public class ConsistentKeyIDAuthority extends AbstractIDAuthority implements Bac
                                             timeout.getNano(), methodTime.toString(), partition, idNamespace));
     }
 
-
+    // fixme 前8位是 block endValue，中间8位是0x0000 到 0xFFFF，用于hbase filter column
     private final StaticBuffer[] getBlockSlice(long blockValue) {
         StaticBuffer[] slice = new StaticBuffer[2];
         slice[0] = new WriteByteBuffer(16).putLong(-blockValue).putLong(0).getStaticBuffer();

@@ -440,7 +440,7 @@ public class Backend implements LockerProvider, AutoCloseable {
                                                                      final Configuration config) {
         try {
             final StoreFeatures features = manager.getFeatures();
-            return getGlobalConfiguration(new BackendOperation.TransactionalProvider() {
+            return getGlobalConfiguration(new BackendOperation.TransactionalProvider() { // 这里设置hbase用的transactionProvider
                 @Override
                 public StoreTransaction openTx() throws BackendException {
                     return manager.beginTransaction(StandardBaseTransactionConfig.of(config.get(TIMESTAMP_PROVIDER),features.getKeyConsistentTxConfig()));

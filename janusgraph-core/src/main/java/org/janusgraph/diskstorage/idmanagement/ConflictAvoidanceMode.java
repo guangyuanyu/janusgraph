@@ -26,7 +26,7 @@ public enum ConflictAvoidanceMode {
      * Disables ID allocation conflict avoidance. This setting does not
      * compromise correctness. However, in a clustered JanusGraph deployment, this
      * may result in ID allocations frequently failing due to contention and
-     * then retrying, slowing overall write throughput.
+     * then retrying, slowing overall write throughput. fixme 保证正确，但是会频繁的id分配
      */
     NONE,
 
@@ -37,7 +37,7 @@ public enum ConflictAvoidanceMode {
      * allocated by that JanusGraph instance. Each JanusGraph instance assumes it has
      * exclusive control over its tag, and it uses datacenter-local-quorum-level
      * consistency (on storage backends that support this concept) when
-     * allocating IDs with its tag.
+     * allocating IDs with its tag. fixme 专家级feature，小心使用
      * <p>
      * This is useful for reducing write latency in JanusGraph deployments atop a
      * multi-datacenter distributed store.

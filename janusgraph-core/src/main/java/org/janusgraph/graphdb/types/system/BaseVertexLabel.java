@@ -21,7 +21,7 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
  * @author Matthias Broecheler (me@matthiasb.com)
  */
 public class BaseVertexLabel extends EmptyVertex implements InternalVertexLabel {
-
+    // fixme 默认使用gremlin的vertex_label
     public static final BaseVertexLabel DEFAULT_VERTEXLABEL = new BaseVertexLabel(Vertex.DEFAULT_LABEL);
 
     private final String name;

@@ -22,7 +22,7 @@ import org.janusgraph.graphdb.types.TypeUtil;
 /**
  * @author Matthias Broecheler (me@matthiasb.com)
  */
-
+// fixme TYPE_MODIFIER 是啥？？
 public enum JanusGraphSchemaCategory {
 
     EDGELABEL, PROPERTYKEY, VERTEXLABEL, GRAPHINDEX, TYPE_MODIFIER;

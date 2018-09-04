@@ -62,7 +62,7 @@ public class VertexIDAssigner implements AutoCloseable {
             "simple", SimpleBulkPlacementStrategy.class.getName()
     );
 
-
+    // fixme key是partitionId
     final ConcurrentMap<Integer,PartitionIDPool> idPools;
     final StandardIDPool schemaIdPool;
     final StandardIDPool partitionVertexIdPool;
@@ -100,7 +100,7 @@ public class VertexIDAssigner implements AutoCloseable {
         renewTimeoutMS = config.get(IDS_RENEW_TIMEOUT);
         renewBufferPercentage = config.get(IDS_RENEW_BUFFER_PERCENTAGE);
 
-        idPools = new ConcurrentHashMap<Integer, PartitionIDPool>(partitionIdBound);
+        idPools = new ConcurrentHashMap<Integer, PartitionIDPool>(partitionIdBound); // fixme schemaIdPool,partitionVertexIdPool为啥不直接放idpools
         schemaIdPool = new StandardIDPool(idAuthority, IDManager.SCHEMA_PARTITION, PoolType.SCHEMA.getIDNamespace(),
                 IDManager.getSchemaCountBound(), renewTimeoutMS, renewBufferPercentage);
         partitionVertexIdPool = new StandardIDPool(idAuthority, IDManager.PARTITIONED_VERTEX_PARTITION, PoolType.PARTITIONED_VERTEX.getIDNamespace(),
@@ -143,7 +143,7 @@ public class VertexIDAssigner implements AutoCloseable {
         }
         idPools.clear();
     }
-
+    // fixme relation 的vertexIdTye = null ?
     public void assignID(InternalRelation relation) {
         assignID(relation, null);
     }
@@ -358,7 +358,7 @@ public class VertexIDAssigner implements AutoCloseable {
         Preconditions.checkArgument(elementId >= 0);
         element.setId(elementId);
     }
-
+    // fixme 除了partitionVertex 和 static vertex 都是normalVertex
     private static IDManager.VertexIDType getVertexIDType(VertexLabel vlabel) {
         if (vlabel.isPartitioned()) {
             return IDManager.VertexIDType.PartitionedVertex;
@@ -393,7 +393,7 @@ public class VertexIDAssigner implements AutoCloseable {
                     return Math.max(10,baseBlockSize/100);
                 case RELATION:
                     return baseBlockSize * 8;
-                case SCHEMA:
+                case SCHEMA: //fixme 对于schema，blockSize是固定的
                     return 50;
 
                 default:
@@ -406,7 +406,7 @@ public class VertexIDAssigner implements AutoCloseable {
             return PoolType.getPoolType(idNamespace).getCountBound(idManager);
         }
     }
-
+    // fixme 用到的idnamespace 只是ordinal() 并无业务含义
     private enum PoolType {
 
         NORMAL_VERTEX, UNMODIFIABLE_VERTEX, PARTITIONED_VERTEX, RELATION, SCHEMA;
@@ -462,7 +462,7 @@ public class VertexIDAssigner implements AutoCloseable {
             for (PoolType type : PoolType.values()) {
                 if (!type.hasOnePerPartition()) continue;
                 put(type,new StandardIDPool(idAuthority, partitionID, type.getIDNamespace(), type.getCountBound(idManager), renewTimeoutMS, renewBufferPercentage));
-            }
+            } //fixme value 是 StandardIDPool
         }
 
         public IDPool getPool(PoolType type) {

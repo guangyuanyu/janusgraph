@@ -132,6 +132,21 @@
             <artifactId>jackson-annotations</artifactId>
             <version>${jackson2.version}</version>
         </dependency>
+
+
+
+
+        <dependency>
+            <groupId>org.apache.tinkerpop</groupId>
+            <artifactId>gremlin-server</artifactId>
+            <version>${tinkerpop.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>janusgraph-hadoop-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
